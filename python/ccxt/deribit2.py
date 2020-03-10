@@ -644,7 +644,7 @@ class deribit2(Exchange):
                 url += self.urlencode(params)
         return {'url': url, 'method': method, 'body': body, 'headers': headers}
 
-    def handle_errors(self, http_code, reason, url, method, headers, body, response):
+    def handle_errors(self, http_code, reason, url, method, headers, body, response, request_headers=None, request_body=None):
         if not response:
             return  # fallback to default error handler
         #
