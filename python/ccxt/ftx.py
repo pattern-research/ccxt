@@ -98,6 +98,9 @@ class ftx(Exchange):
                         'lt/redemptions',
                         'subaccounts',
                         'subaccounts/{nickname}/balances',
+                        'options/account_info',
+                        'options/positions',
+                        'options/fills',
                     ],
                     'post': [
                         'account/leverage',
