@@ -60,6 +60,7 @@ class deribit2(Exchange):
                         'get_index',
                         'get_summary',
                         'get_currencies',
+                        'get_funding_rate_value',
                         'get_order_book',
                         'get_instruments',
                         'get_trade_volumes',
@@ -74,9 +75,13 @@ class deribit2(Exchange):
                         'get_account_summary',
                         'get_new_announcements',
                         'get_open_orders_by_instrument',
+                        'get_user_trades_by_currency',
                         'get_user_trades_by_instrument',
                         'get_order_history_by_instrument',
-                        'get_stop_order_history'
+                        'get_stop_order_history',
+                        'get_deposits',
+                        'get_transfers',
+                        'get_withdrawals'
                     ],
                     'post': [
                         'buy',
