@@ -80,6 +80,7 @@ class deribit2(Exchange):
                         'get_user_trades_by_currency_and_time',
                         'get_user_trades_by_instrument',
                         'get_user_trades_by_instrument_and_time',
+                        'get_settlement_history_by_currency',
                         'get_order_history_by_instrument',
                         'get_stop_order_history',
                         'get_deposits',
