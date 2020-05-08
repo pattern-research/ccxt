@@ -184,11 +184,12 @@ class yobit(Exchange):
                     'api key dont have trade permission': AuthenticationError,
                     'invalid parameter': InvalidOrder,
                     'invalid order': InvalidOrder,
+                    'The given order has already been cancelled': InvalidOrder,
                     'Requests too often': DDoSProtection,
                     'not available': ExchangeNotAvailable,
                     'data unavailable': ExchangeNotAvailable,
                     'external service unavailable': ExchangeNotAvailable,
-                    'Total transaction amount': ExchangeError,  # {"success": 0, "error": "Total transaction amount is less than minimal total: 0.00010000"}
+                    'Total transaction amount': InvalidOrder,  # {"success": 0, "error": "Total transaction amount is less than minimal total: 0.00010000"}
                     'Insufficient funds': InsufficientFunds,
                     'invalid key': AuthenticationError,
                     'invalid nonce': InvalidNonce,  # {"success":0,"error":"invalid nonce(has already been used)"}'
@@ -520,9 +521,13 @@ class yobit(Exchange):
             'filled': filled,
             'fee': None,
             # 'trades': self.parse_trades(order['trades'], market),
+            'info': response,
+            'clientOrderId': None,
+            'average': None,
+            'trades': None,
         }
         self.orders[id] = order
-        return self.extend({'info': response}, order)
+        return order
 
     async def cancel_order(self, id, symbol=None, params={}):
         await self.load_markets()
@@ -574,6 +579,7 @@ class yobit(Exchange):
         result = {
             'info': order,
             'id': id,
+            'clientOrderId': None,
             'symbol': symbol,
             'timestamp': timestamp,
             'datetime': self.iso8601(timestamp),
@@ -587,6 +593,8 @@ class yobit(Exchange):
             'filled': filled,
             'status': status,
             'fee': fee,
+            'average': None,
+            'trades': None,
         }
         return result
 

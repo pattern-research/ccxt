@@ -967,6 +967,7 @@ module.exports = class bitstamp extends Exchange {
         }
         return {
             'id': id,
+            'clientOrderId': undefined,
             'datetime': this.iso8601 (timestamp),
             'timestamp': timestamp,
             'lastTradeTimestamp': lastTradeTimestamp,
@@ -982,6 +983,7 @@ module.exports = class bitstamp extends Exchange {
             'trades': trades,
             'fee': fee,
             'info': order,
+            'average': undefined,
         };
     }
 
@@ -1102,7 +1104,20 @@ module.exports = class bitstamp extends Exchange {
         } else {
             this.checkRequiredCredentials ();
             const authVersion = this.safeValue (this.options, 'auth', 'v2');
-            if (authVersion === 'v2') {
+            if ((authVersion === 'v1') || (api === 'v1')) {
+                const nonce = this.nonce ().toString ();
+                const auth = nonce + this.uid + this.apiKey;
+                const signature = this.encode (this.hmac (this.encode (auth), this.encode (this.secret)));
+                query = this.extend ({
+                    'key': this.apiKey,
+                    'signature': signature.toUpperCase (),
+                    'nonce': nonce,
+                }, query);
+                body = this.urlencode (query);
+                headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                };
+            } else {
                 const xAuth = 'BITSTAMP ' + this.apiKey;
                 const xAuthNonce = this.uuid ();
                 const xAuthTimestamp = this.milliseconds ().toString ();
@@ -1119,25 +1134,20 @@ module.exports = class bitstamp extends Exchange {
                         body = this.urlencode (query);
                         contentType = 'application/x-www-form-urlencoded';
                         headers['Content-Type'] = contentType;
+                    } else {
+                        // sending an empty POST request will trigger
+                        // an API0020 error returned by the exchange
+                        // therefore for empty requests we send a dummy object
+                        // https://github.com/ccxt/ccxt/issues/6846
+                        body = this.urlencode ({ 'foo': 'bar' });
+                        contentType = 'application/x-www-form-urlencoded';
+                        headers['Content-Type'] = contentType;
                     }
                 }
                 const authBody = body ? body : '';
                 const auth = xAuth + method + url.replace ('https://', '') + contentType + xAuthNonce + xAuthTimestamp + xAuthVersion + authBody;
-                const signature = this.encode (this.hmac (this.encode (auth), this.encode (this.secret)));
+                const signature = this.hmac (this.encode (auth), this.encode (this.secret));
                 headers['X-Auth-Signature'] = signature;
-            } else {
-                const nonce = this.nonce ().toString ();
-                const auth = nonce + this.uid + this.apiKey;
-                const signature = this.encode (this.hmac (this.encode (auth), this.encode (this.secret)));
-                query = this.extend ({
-                    'key': this.apiKey,
-                    'signature': signature.toUpperCase (),
-                    'nonce': nonce,
-                }, query);
-                body = this.urlencode (query);
-                headers = {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                };
             }
         }
         return { 'url': url, 'method': method, 'body': body, 'headers': headers };
